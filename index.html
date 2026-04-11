@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bultum Academy — MCA Math Practice</title>
+<style>
+  :root {
+    --green-dark:#0D3D2E;--green-mid:#1A6B4A;--green-acc:#27AE72;--green-pale:#E8F5EF;
+    --purp:#7C3AED;--purp-l:#F5F3FF;--purp-d:#4C1D95;
+    --blue:#1D4ED8;--blue-l:#EFF6FF;
+    --amber:#D97706;--amber-l:#FFFBEB;
+    --red:#DC2626;--red-l:#FEF2F2;
+    --text:#1F2937;--muted:#6B7280;--border:#E5E7EB;--bg:#F9FAFB;
+    --white:#fff;--radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+  /* ── Header ── */
+  .site-header{background:var(--green-dark);color:#fff;padding:0 1.5rem}
+  .header-inner{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:14px 0}
+  .logo-circle{width:44px;height:44px;border-radius:50%;background:var(--green-acc);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:var(--green-dark);flex-shrink:0}
+  .header-text h1{font-size:1.15rem;font-weight:700;letter-spacing:-.01em}
+  .header-text p{font-size:.75rem;color:#A8D5BE;margin-top:1px}
+  .accent-bar{height:3px;background:var(--green-acc)}
+
+  /* ── Main ── */
+  main{max-width:860px;margin:0 auto;padding:1.5rem 1rem 3rem}
+
+  /* ── Grade Select Screen ── */
+  .screen{display:none}.screen.active{display:block}
+  .hero{text-align:center;padding:2rem 0 1.5rem}
+  .hero h2{font-size:2rem;font-weight:800;color:var(--green-dark);line-height:1.1}
+  .hero p{color:var(--muted);margin-top:.5rem;font-size:1rem}
+  .grade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1.5rem}
+  .grade-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;cursor:pointer;transition:all .2s;text-align:left;position:relative;overflow:hidden}
+  .grade-card:hover{border-color:var(--green-acc);transform:translateY(-2px);box-shadow:0 8px 24px rgba(39,174,114,.15)}
+  .grade-card .badge{display:inline-block;background:var(--green-pale);color:var(--green-mid);font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:.6rem;letter-spacing:.05em;text-transform:uppercase}
+  .grade-card h3{font-size:1.2rem;font-weight:700;color:var(--text)}
+  .grade-card p{font-size:.82rem;color:var(--muted);margin-top:.3rem}
+  .grade-card .arrow{position:absolute;right:1.25rem;top:50%;transform:translateY(-50%);color:var(--green-acc);font-size:1.3rem;opacity:.6}
+  .grade-card:hover .arrow{opacity:1;right:1rem}
+
+  /* ── Quiz Screen ── */
+  .quiz-top{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap}
+  .back-btn{background:none;border:1.5px solid var(--border);border-radius:8px;padding:.4rem .9rem;cursor:pointer;font-size:.85rem;color:var(--muted);display:flex;align-items:center;gap:.4rem;transition:all .15s}
+  .back-btn:hover{border-color:var(--text);color:var(--text)}
+  .quiz-title{font-weight:700;font-size:1rem;color:var(--text)}
+  .score-display{margin-left:auto;background:var(--purp-l);color:var(--purp-d);border-radius:20px;padding:.3rem .9rem;font-size:.82rem;font-weight:600}
+
+  /* Progress bar */
+  .progress-wrap{background:#E5E7EB;border-radius:99px;height:6px;margin-bottom:1.5rem;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--green-acc),var(--purp));border-radius:99px;transition:width .4s ease}
+  .progress-label{font-size:.78rem;color:var(--muted);margin-bottom:.4rem;display:flex;justify-content:space-between}
+
+  /* Question card */
+  .q-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+  .q-number{font-size:.75rem;font-weight:700;color:var(--purp);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.6rem}
+  .q-text{font-size:1.02rem;font-weight:600;line-height:1.55;color:var(--text);margin-bottom:1.25rem}
+  .choices{display:flex;flex-direction:column;gap:.6rem}
+  .choice-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:.85rem 1.1rem;cursor:pointer;text-align:left;font-size:.95rem;font-weight:500;color:var(--text);transition:all .18s;display:flex;align-items:center;gap:.75rem}
+  .choice-btn:hover:not(:disabled){border-color:var(--purp);background:var(--purp-l);color:var(--purp-d)}
+  .choice-btn.correct{border-color:#16A34A;background:#F0FDF4;color:#14532D;pointer-events:none}
+  .choice-btn.wrong{border-color:var(--red);background:var(--red-l);color:var(--red);pointer-events:none}
+  .choice-btn.faded{opacity:.45;pointer-events:none}
+  .choice-btn.selected-correct{border-color:#16A34A;background:#F0FDF4;color:#14532D}
+  .choice-icon{width:24px;height:24px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;font-weight:700}
+  .choice-btn.correct .choice-icon{background:#16A34A;border-color:#16A34A;color:#fff}
+  .choice-btn.wrong .choice-icon{background:var(--red);border-color:var(--red);color:#fff}
+
+  /* Feedback */
+  .feedback{margin-top:1.1rem;padding:.9rem 1.1rem;border-radius:10px;font-size:.92rem;font-weight:500;display:none}
+  .feedback.show{display:flex;align-items:flex-start;gap:.6rem}
+  .feedback.correct{background:#F0FDF4;color:#14532D;border:1px solid #BBF7D0}
+  .feedback.wrong{background:var(--red-l);color:var(--red);border:1px solid #FECACA}
+  .feedback-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+  .next-btn{margin-top:1.1rem;width:100%;background:var(--green-mid);color:#fff;border:none;border-radius:10px;padding:.85rem;font-size:.98rem;font-weight:600;cursor:pointer;transition:background .15s;display:none}
+  .next-btn.show{display:block}
+  .next-btn:hover{background:var(--green-dark)}
+
+  /* ── Results Screen ── */
+  .results-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:2rem;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+  .results-badge{font-size:3.5rem;margin-bottom:.5rem}
+  .results-score{font-size:3rem;font-weight:800;color:var(--green-dark);line-height:1}
+  .results-label{color:var(--muted);font-size:.95rem;margin-top:.3rem}
+  .results-msg{margin-top:1rem;font-size:1.05rem;font-weight:600;color:var(--text)}
+  .results-sub{color:var(--muted);font-size:.9rem;margin-top:.3rem}
+  .results-bar-wrap{background:#E5E7EB;border-radius:99px;height:14px;margin:1.5rem 0;overflow:hidden}
+  .results-bar{height:100%;border-radius:99px;transition:width 1s ease}
+  .results-actions{display:flex;gap:.75rem;margin-top:1.5rem;flex-wrap:wrap}
+  .btn-primary{flex:1;background:var(--green-mid);color:#fff;border:none;border-radius:10px;padding:.85rem;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .15s}
+  .btn-primary:hover{background:var(--green-dark)}
+  .btn-secondary{flex:1;background:var(--white);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:.85rem;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .15s}
+  .btn-secondary:hover{border-color:var(--text)}
+  .breakdown{margin-top:1.5rem;text-align:left}
+  .breakdown h4{font-size:.85rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem}
+  .breakdown-item{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.88rem}
+  .breakdown-item:last-child{border-bottom:none}
+  .b-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+  .b-num.ok{background:#F0FDF4;color:#14532D}
+  .b-num.bad{background:var(--red-l);color:var(--red)}
+  .b-q{flex:1;color:var(--text)}
+  .b-ans{font-size:.8rem;color:var(--green-mid);font-weight:600}
+  .b-wrong{font-size:.8rem;color:var(--red);text-decoration:line-through;margin-right:.3rem}
+
+  @media(max-width:500px){
+    .hero h2{font-size:1.5rem}
+    .grade-grid{grid-template-columns:1fr}
+    .results-score{font-size:2.5rem}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo-circle">BA</div>
+    <div class="header-text">
+      <h1>Bultum Academy</h1>
+      <p>MCA Math Practice — Grades 3–8</p>
+    </div>
+  </div>
+</header>
+<div class="accent-bar"></div>
+
+<main>
+
+<!-- ── Screen 1: Grade Select ─────────────────────────────────── -->
+<div id="screen-home" class="screen active">
+  <div class="hero">
+    <h2>MCA Math Practice</h2>
+    <p>Choose your grade to start practicing. Get instant feedback on every question!</p>
+  </div>
+  <div class="grade-grid" id="grade-grid"></div>
+</div>
+
+<!-- ── Screen 2: Quiz ─────────────────────────────────────────── -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-top">
+    <button class="back-btn" onclick="goHome()">← Grades</button>
+    <span class="quiz-title" id="quiz-title"></span>
+    <span class="score-display" id="score-display">Score: 0/0</span>
+  </div>
+  <div class="progress-label">
+    <span id="prog-label">Question 1 of 25</span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="q-card">
+    <div class="q-number" id="q-number"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback">
+      <span class="feedback-icon" id="fb-icon"></span>
+      <span id="fb-text"></span>
+    </div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question →</button>
+  </div>
+</div>
+
+<!-- ── Screen 3: Results ──────────────────────────────────────── -->
+<div id="screen-results" class="screen">
+  <div class="results-card">
+    <div class="results-badge" id="res-badge"></div>
+    <div class="results-score" id="res-score"></div>
+    <div class="results-label" id="res-label"></div>
+    <div class="results-msg" id="res-msg"></div>
+    <div class="results-sub" id="res-sub"></div>
+    <div class="results-bar-wrap"><div class="results-bar" id="res-bar"></div></div>
+    <div class="results-actions">
+      <button class="btn-primary" onclick="retryQuiz()">Try Again</button>
+      <button class="btn-secondary" onclick="goHome()">Change Grade</button>
+    </div>
+    <div class="breakdown" id="breakdown"></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+const GRADES = {
+  "Grade 3": {
+    color:"#1F3864", badge:"Elementary",
+    desc:"Addition, multiplication, fractions, shapes & measurement",
+    questions:[
+      {q:"What is 47 + 36?",choices:["73","83","93","74"],ans:1},
+      {q:"There are 4 groups of 6 apples. How many apples are there in all?",choices:["10","20","24","28"],ans:2},
+      {q:"Which fraction is equivalent to 1/2?",choices:["1/4","2/4","3/4","3/8"],ans:1},
+      {q:"What is 8 × 7?",choices:["54","56","63","48"],ans:1},
+      {q:"A rectangle has length 5 cm and width 3 cm. What is its perimeter?",choices:["8 cm","15 cm","16 cm","10 cm"],ans:2},
+      {q:"Round 374 to the nearest hundred.",choices:["300","370","380","400"],ans:3},
+      {q:"What is 81 ÷ 9?",choices:["7","8","9","10"],ans:2},
+      {q:"Which number is even?",choices:["37","51","84","99"],ans:2},
+      {q:"3 out of 8 equal parts are shaded. What fraction is shaded?",choices:["3/5","5/8","3/8","8/3"],ans:2},
+      {q:"24 marbles are shared equally among 6 friends. How many does each friend get?",choices:["3","4","6","18"],ans:1},
+      {q:"The hour hand is on 3 and the minute hand is on 12. What time is it?",choices:["12:03","3:00","3:12","12:15"],ans:1},
+      {q:"Which symbol makes this true?   456 ___ 465",choices:["&gt;","&lt;","=","+"],ans:1},
+      {q:"A rectangle has length 7 units and width 4 units. What is its area?",choices:["11 sq units","22 sq units","28 sq units","14 sq units"],ans:2},
+      {q:"What is 500 – 263?",choices:["237","247","337","763"],ans:0},
+      {q:"Which digit is in the hundreds place in 4,726?",choices:["4","7","2","6"],ans:1},
+      {q:"Bar graph: Mon=5, Tue=8, Wed=6, Thu=9 students. What is the total?",choices:["26","28","30","24"],ans:1},
+      {q:"Which is true?",choices:["1/3 &gt; 1/2","1/4 &lt; 1/3","1/2 &lt; 1/4","1/3 = 1/4"],ans:1},
+      {q:"What multiplication fact helps you solve 35 ÷ 5?",choices:["5 × 5 = 25","5 × 7 = 35","5 × 8 = 40","6 × 5 = 30"],ans:1},
+      {q:"There are 3 boxes with 9 crayons each. How many crayons total?",choices:["12","21","27","36"],ans:2},
+      {q:"What is the value of the digit 6 in 672?",choices:["6","60","600","6,000"],ans:2},
+      {q:"Which two shapes have 4 sides?",choices:["Triangle and circle","Square and rectangle","Pentagon and hexagon","Oval and triangle"],ans:1},
+      {q:"If 4 × 6 = 24, what is 24 ÷ 4?",choices:["4","5","6","8"],ans:2},
+      {q:"A number line shows jumps of 3 starting at 0. What is the 5th number?",choices:["12","15","18","5"],ans:1},
+      {q:"What is the missing number?   7 × ___ = 63",choices:["7","8","9","6"],ans:2},
+      {q:"Which shape has exactly 1 line of symmetry?",choices:["Square","Rectangle","Isosceles triangle","Circle"],ans:2},
+    ]
+  },
+  "Grade 4": {
+    color:"#1A5276", badge:"Elementary",
+    desc:"Multi-digit operations, fractions, geometry & time",
+    questions:[
+      {q:"What is 3,456 + 2,789?",choices:["5,245","6,145","6,245","6,355"],ans:2},
+      {q:"A rectangle has length 9 cm and width 4 cm. What is its area?",choices:["13 cm²","26 cm²","36 cm²","40 cm²"],ans:2},
+      {q:"Which fraction is equivalent to 3/4?",choices:["6/8","4/6","5/8","2/3"],ans:0},
+      {q:"What is 56 × 7?",choices:["382","392","372","402"],ans:1},
+      {q:"What is 2,000 – 847?",choices:["1,153","1,163","1,053","1,253"],ans:0},
+      {q:"A bag of rice weighs 2.5 kg. How many grams is that? (1 kg = 1,000 g)",choices:["25 g","250 g","2,500 g","25,000 g"],ans:2},
+      {q:"Which is a prime number?",choices:["4","9","15","17"],ans:3},
+      {q:"What is 4/5 as a decimal?",choices:["0.45","0.54","0.80","0.08"],ans:2},
+      {q:"What is 6,300 ÷ 9?",choices:["600","700","70","6,300"],ans:1},
+      {q:"Which angle is greater than 90°?",choices:["Acute angle","Right angle","Obtuse angle","Straight angle"],ans:2},
+      {q:"Order from least to greatest:   3/4, 1/2, 7/8",choices:["7/8, 3/4, 1/2","1/2, 3/4, 7/8","3/4, 1/2, 7/8","1/2, 7/8, 3/4"],ans:1},
+      {q:"What is 1/3 + 1/3?",choices:["2/6","2/3","1/6","3/6"],ans:1},
+      {q:"A movie starts at 2:15 PM and lasts 1 hour 45 minutes. What time does it end?",choices:["3:45 PM","4:00 PM","3:00 PM","4:15 PM"],ans:1},
+      {q:"Which number has the digit 5 in the ten-thousands place?",choices:["52,000","5,200","500","50"],ans:0},
+      {q:"What is 3 × 247?",choices:["631","641","741","731"],ans:2},
+      {q:"What is the area of a square with side length 8 cm?",choices:["32 cm²","64 cm²","16 cm²","24 cm²"],ans:1},
+      {q:"A school collects 1,250 cans in January and 875 in February. How many total?",choices:["2,025","2,125","2,100","2,105"],ans:1},
+      {q:"What is 5/8 – 3/8?",choices:["2/0","2/16","2/8","8/8"],ans:2},
+      {q:"Pattern: 3, 6, 12, 24, ___. What is the next number?",choices:["36","40","48","30"],ans:2},
+      {q:"How many lines of symmetry does a regular hexagon have?",choices:["2","4","6","8"],ans:2},
+      {q:"What is 25 × 40?",choices:["800","1,000","900","1,100"],ans:1},
+      {q:"Round 4,672 to the nearest thousand.",choices:["4,000","4,600","4,700","5,000"],ans:3},
+      {q:"A right triangle has legs of 3 cm and 4 cm, and a hypotenuse of 5 cm. What is the perimeter?",choices:["10 cm","12 cm","7 cm","14 cm"],ans:1},
+      {q:"What is 5 × (3 + 4)?",choices:["19","35","23","32"],ans:1},
+      {q:"Which pair of fractions is equivalent?",choices:["1/2 and 2/5","2/3 and 4/6","3/4 and 5/8","1/3 and 2/5"],ans:1},
+    ]
+  },
+  "Grade 5": {
+    color:"#0D3D2E", badge:"Elementary",
+    desc:"Decimals, fractions, volume, expressions & coordinates",
+    questions:[
+      {q:"What is 4.56 + 3.7?",choices:["7.93","8.26","8.13","7.26"],ans:1},
+      {q:"A rectangular prism has length 5 cm, width 3 cm, and height 4 cm. What is its volume?",choices:["12 cm³","47 cm³","60 cm³","20 cm³"],ans:2},
+      {q:"Write the fraction 3/5 as a decimal.",choices:["0.35","0.53","0.60","0.06"],ans:2},
+      {q:"What is 12.4 – 5.87?",choices:["6.53","7.53","6.47","7.47"],ans:0},
+      {q:"What is 2/3 × 3/4?",choices:["5/7","6/12","1/2","5/12"],ans:2},
+      {q:"What is 3.6 × 4?",choices:["12.4","14.4","13.6","15.4"],ans:1},
+      {q:"A bag has 3/4 pound of flour. A recipe needs 1/2 pound. How much flour is left?",choices:["1/4 lb","1/2 lb","3/8 lb","1 lb"],ans:0},
+      {q:"What is 500 × 0.3?",choices:["15","150","1,500","1.5"],ans:1},
+      {q:"What is the prime factorization of 36?",choices:["2 × 18","4 × 9","2² × 3²","6 × 6"],ans:2},
+      {q:"Write 0.75 as a fraction in simplest form.",choices:["75/100","7/10","3/4","5/7"],ans:2},
+      {q:"What is 1/2 ÷ 1/4?",choices:["1/8","2","1/4","4"],ans:1},
+      {q:"A container holds 8.5 liters. You pour out 3.25 liters. How much is left?",choices:["4.75 L","5.25 L","5.75 L","5.00 L"],ans:1},
+      {q:"What is the value of 3³?",choices:["9","6","27","33"],ans:2},
+      {q:"A square has a side length of 6.5 cm. What is its area?",choices:["26 cm²","40.25 cm²","42.25 cm²","36 cm²"],ans:2},
+      {q:"A number is multiplied by 10³. How does this affect the decimal point?",choices:["Moves 3 places to the left","Moves 3 places to the right","Adds 3 to the number","Divides the number by 3"],ans:1},
+      {q:"What is 2/5 + 3/10?",choices:["5/15","7/10","5/10","4/10"],ans:1},
+      {q:"A classroom has 30 students. 2/5 are wearing glasses. How many students wear glasses?",choices:["10","12","15","6"],ans:1},
+      {q:"Round 47.386 to the nearest hundredth.",choices:["47.3","47.38","47.39","47.4"],ans:2},
+      {q:"A box is 4 cm × 5 cm × 6 cm. What is its volume?",choices:["100 cm³","110 cm³","120 cm³","115 cm³"],ans:2},
+      {q:"What is 9,000 ÷ 300?",choices:["3","30","300","0.3"],ans:1},
+      {q:"Which expression has the greatest value?",choices:["4 + 3 × 2","(4 + 3) × 2","4 × 3 + 2","4 × (3 + 2)"],ans:3},
+      {q:"What is 5/6 – 1/3?",choices:["4/3","1/2","2/6","4/6"],ans:1},
+      {q:"A recipe needs 2¼ cups of sugar. How much is needed for double the recipe?",choices:["4 cups","4¼ cups","4½ cups","3½ cups"],ans:2},
+      {q:"What is 6.25 × 10?",choices:["0.625","6.250","62.5","625"],ans:2},
+      {q:"The ordered pair (3, 5) is plotted on a coordinate plane. Which quadrant is it in?",choices:["Quadrant II","Quadrant III","Quadrant I","Quadrant IV"],ans:2},
+    ]
+  },
+  "Grade 6": {
+    color:"#2E4057", badge:"Middle School",
+    desc:"Ratios, equations, statistics, integers & geometry",
+    questions:[
+      {q:"What is 3/4 ÷ 1/2?",choices:["3/8","1½","6/4","2/3"],ans:1},
+      {q:"Solve for x:   2x + 5 = 17",choices:["x = 6","x = 7","x = 11","x = 5"],ans:0},
+      {q:"A bag has 4 red, 3 blue, and 5 green marbles. What is the probability of picking a blue marble?",choices:["1/4","3/12","1/3","3/4"],ans:1},
+      {q:"What is the GCF of 24 and 36?",choices:["6","9","12","18"],ans:2},
+      {q:"What is 2.4 × 3.5?",choices:["7.2","8.4","6.8","9.2"],ans:1},
+      {q:"Evaluate:   3² + 4 × 2",choices:["17","22","14","25"],ans:0},
+      {q:"What is the LCM of 4 and 6?",choices:["2","12","24","6"],ans:1},
+      {q:"A shirt costs $25. It is on sale for 20% off. What is the sale price?",choices:["$5","$15","$20","$22"],ans:2},
+      {q:"Simplify:   4(3x + 2)",choices:["7x + 6","12x + 8","12x + 2","7x + 8"],ans:1},
+      {q:"What is the mean of:   4, 7, 9, 6, 4?",choices:["5","6","7","8"],ans:1},
+      {q:"What is  −3 + 7?",choices:["−10","−4","4","10"],ans:2},
+      {q:"What is the area of a triangle with base 8 and height 5?",choices:["40","20","13","16"],ans:1},
+      {q:"Write the ratio 5:20 as a unit rate (per 1).",choices:["1/5","1/4","1/3","4/1"],ans:1},
+      {q:"Which value satisfies the inequality   x + 3 > 8?",choices:["x = 4","x = 5","x = 6","x = 3"],ans:2},
+      {q:"A car travels 180 miles in 3 hours. What is its speed in miles per hour?",choices:["50 mph","60 mph","55 mph","65 mph"],ans:1},
+      {q:"What is the median of:   3, 7, 9, 2, 5?",choices:["5","7","9","2"],ans:0},
+      {q:"What is the surface area of a rectangular prism with length 4, width 3, height 2?",choices:["24","52","26","48"],ans:1},
+      {q:"Convert 3/8 to a percent.",choices:["38%","37.5%","40%","35%"],ans:1},
+      {q:"Simplify:   18/24",choices:["2/3","3/4","4/5","6/8"],ans:1},
+      {q:"What is the absolute value of −15?",choices:["−15","0","15","150"],ans:2},
+      {q:"A recipe needs 2.5 cups of flour for 20 cookies. How much for 40 cookies?",choices:["4 cups","5 cups","3 cups","6 cups"],ans:1},
+      {q:"What is the volume of a cube with side length 4 cm?",choices:["16 cm³","48 cm³","64 cm³","24 cm³"],ans:2},
+      {q:"Point (−2, 3) is plotted on a coordinate plane. Which quadrant is it in?",choices:["Quadrant I","Quadrant II","Quadrant III","Quadrant IV"],ans:1},
+      {q:"What is 5/6 ÷ 1/3?",choices:["5/18","5/2","2/5","15/6"],ans:1},
+      {q:"Which expression is equivalent to   2(x + 4) + 3x?",choices:["5x + 4","5x + 8","6x + 4","2x + 8"],ans:1},
+    ]
+  },
+  "Grade 7": {
+    color:"#14532D", badge:"Middle School",
+    desc:"Percents, proportions, geometry, integers & probability",
+    questions:[
+      {q:"What is 30% of 150?",choices:["30","45","50","55"],ans:1},
+      {q:"Solve:   −3 + (−7) = ?",choices:["10","4","−10","−4"],ans:2},
+      {q:"A triangle has angles of 45° and 65°. What is the measure of the third angle?",choices:["60°","70°","80°","90°"],ans:1},
+      {q:"Solve:   3x – 4 = 11",choices:["x = 4","x = 5","x = 7","x = 3"],ans:1},
+      {q:"What is  −6 × (−4)?",choices:["−24","24","−10","10"],ans:1},
+      {q:"A store marks up a $40 item by 25%. What is the new price?",choices:["$45","$50","$55","$60"],ans:1},
+      {q:"What is the circumference of a circle with radius 7? (Use π ≈ 3.14)",choices:["21.98","43.96","153.86","22"],ans:1},
+      {q:"Solve:   2(x + 3) = 14",choices:["x = 4","x = 5.5","x = 8","x = 7"],ans:0},
+      {q:"What is  −15 ÷ 3?",choices:["5","−5","45","−45"],ans:1},
+      {q:"A map has a scale of 1 inch = 50 miles. Two cities are 3.5 inches apart. How far apart are they?",choices:["150 miles","175 miles","200 miles","165 miles"],ans:1},
+      {q:"What is the area of a circle with diameter 10? (Use π ≈ 3.14)",choices:["31.4","78.5","314","62.8"],ans:1},
+      {q:"A shirt costs $36 after a 10% discount. What was the original price?",choices:["$38","$40","$42","$45"],ans:1},
+      {q:"What is 4/5 of 75?",choices:["50","60","70","45"],ans:1},
+      {q:"Simplify:   −2(3x – 5)",choices:["−6x − 10","−6x + 10","6x − 10","6x + 10"],ans:1},
+      {q:"A bag has 5 red and 3 blue chips. What is the probability of NOT picking red?",choices:["5/8","3/8","1/2","3/5"],ans:1},
+      {q:"What is the surface area of a cube with side 5 cm?",choices:["25 cm²","100 cm²","125 cm²","150 cm²"],ans:3},
+      {q:"Solve:   x/4 + 2 = 6",choices:["x = 8","x = 16","x = 12","x = 10"],ans:1},
+      {q:"Which is a proportional relationship?",choices:["y = 3x + 2","y = 4x","y = x² + 1","y = 2x – 5"],ans:1},
+      {q:"What is the volume of a cylinder with radius 3 and height 10? (Use π ≈ 3.14)",choices:["94.2","282.6","942","188.4"],ans:1},
+      {q:"The temperature drops from 4°F to −11°F. What is the change in temperature?",choices:["−7°F","−15°F","7°F","15°F"],ans:1},
+      {q:"A data set is: 2, 4, 4, 6, 8, 10. What is the mode?",choices:["2","4","6","8"],ans:1},
+      {q:"Evaluate:   −3² + 4 × 2",choices:["17","−1","1","−17"],ans:1},
+      {q:"A rectangle's length is 3 more than twice its width. If the width is 5, what is the area?",choices:["55","65","60","45"],ans:1},
+      {q:"What is 15% of 200?",choices:["20","30","25","35"],ans:1},
+      {q:"Solve for y:   5y – 3 = 2y + 9",choices:["y = 2","y = 4","y = 6","y = 12"],ans:1},
+    ]
+  },
+  "Grade 8": {
+    color:"#3B1A5A", badge:"Middle School",
+    desc:"Linear functions, Pythagorean theorem, systems & data",
+    questions:[
+      {q:"What is the slope of the line passing through (2, 3) and (6, 11)?",choices:["1","2","3","4"],ans:1},
+      {q:"Which of the following is an irrational number?",choices:["1/3","√4","√7","0.75"],ans:2},
+      {q:"If a = 6 and b = 8, what is c in the equation a² + b² = c²?",choices:["10","12","14","100"],ans:0},
+      {q:"Solve:   4x + 3 = 2x + 11",choices:["x = 2","x = 4","x = 8","x = 3"],ans:1},
+      {q:"What is the y-intercept of   y = 3x – 5?",choices:["3","−5","5","−3"],ans:1},
+      {q:"Simplify:   √144",choices:["11","12","13","14"],ans:1},
+      {q:"Two lines are parallel. Line 1 has slope 2. What is the slope of Line 2?",choices:["−2","1/2","2","−1/2"],ans:2},
+      {q:"Which transformation moves a figure without changing its size or shape?",choices:["Dilation","Translation","Stretching","Shearing"],ans:1},
+      {q:"Solve the system:   y = 2x + 1  and  y = −x + 7",choices:["(2, 5)","(3, 4)","(1, 3)","(4, 9)"],ans:0},
+      {q:"What is 3.6 × 10⁴ in standard form?",choices:["360","3,600","36,000","360,000"],ans:2},
+      {q:"A right triangle has legs of 5 and 12. What is the length of the hypotenuse?",choices:["11","13","15","17"],ans:1},
+      {q:"What is the slope of a horizontal line?",choices:["Undefined","1","0","−1"],ans:2},
+      {q:"Which function is linear?",choices:["y = x²","y = 2x + 3","y = 1/x","y = √x"],ans:1},
+      {q:"Solve:   2(3x – 4) = 16",choices:["x = 3","x = 4","x = 6","x = 2"],ans:1},
+      {q:"What is 5.2 × 10⁻³ in standard form?",choices:["52,000","5,200","0.0052","0.052"],ans:2},
+      {q:"A scatter plot shows that as study time increases, test scores also increase. This is:",choices:["Negative correlation","No correlation","Positive correlation","Inverse relationship"],ans:2},
+      {q:"What is the volume of a cone with radius 3 and height 9? (Use π ≈ 3.14)",choices:["84.78","254.34","56.52","28.26"],ans:0},
+      {q:"A line passes through (0, 4) and (2, 8). What is the equation of the line?",choices:["y = 4x","y = 2x + 4","y = 4x + 2","y = x + 4"],ans:1},
+      {q:"How many solutions does this system have?   y = 2x + 1  and  y = 2x + 5",choices:["One","Two","Infinitely many","No solution"],ans:3},
+      {q:"When two parallel lines are cut by a transversal, angles at the same position on each line are called:",choices:["Supplementary angles","Corresponding angles","Vertical angles","Adjacent angles"],ans:1},
+      {q:"What is the distance between points (1, 2) and (4, 6)?",choices:["3","4","5","7"],ans:2},
+      {q:"Which number is NOT irrational?",choices:["√2","π","√9","√5"],ans:2},
+      {q:"A function is defined as f(x) = 3x – 2. What is f(5)?",choices:["11","13","15","17"],ans:1},
+      {q:"Simplify:   (2³)²",choices:["2⁵","2⁶","2⁸","2¹⁶"],ans:1},
+      {q:"The line y = −½x + 3 has a slope of:",choices:["3","−1/2","1/2","−3"],ans:1},
+    ]
+  }
+};
+
+const LABELS = ["A","B","C","D"];
+let currentGrade = null, currentQs = [], qIndex = 0, score = 0, userAnswers = [];
+
+// Build grade cards
+const grid = document.getElementById('grade-grid');
+Object.entries(GRADES).forEach(([name, data]) => {
+  const card = document.createElement('div');
+  card.className = 'grade-card';
+  card.innerHTML = `
+    <span class="badge">${data.badge}</span>
+    <h3>${name}</h3>
+    <p>${data.desc}</p>
+    <p style="margin-top:.5rem;font-size:.8rem;color:#27AE72;font-weight:600">25 questions</p>
+    <span class="arrow">→</span>`;
+  card.onclick = () => startQuiz(name);
+  grid.appendChild(card);
+});
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function startQuiz(grade) {
+  currentGrade = grade;
+  currentQs = [...GRADES[grade].questions];
+  qIndex = 0; score = 0; userAnswers = [];
+  document.getElementById('quiz-title').textContent = grade + ' — Math';
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = currentQs[qIndex];
+  const total = currentQs.length;
+  const pct = Math.round((qIndex/total)*100);
+  document.getElementById('q-number').textContent = `Question ${qIndex+1} of ${total}`;
+  document.getElementById('prog-label').textContent = `Question ${qIndex+1} of ${total}`;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('score-display').textContent = `Score: ${score}/${qIndex}`;
+  document.getElementById('q-text').innerHTML = q.q;
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('next-btn').className = 'next-btn';
+
+  const ch = document.getElementById('choices');
+  ch.innerHTML = '';
+  q.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-icon">${LABELS[i]}</span><span>${c}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    ch.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  const q = currentQs[qIndex];
+  const btns = document.querySelectorAll('.choice-btn');
+  const fb = document.getElementById('feedback');
+  const fbIcon = document.getElementById('fb-icon');
+  const fbText = document.getElementById('fb-text');
+  const correct = q.ans;
+  userAnswers.push({chosen: idx, correct: correct, q: q.q, correctText: q.choices[correct]});
+
+  btns.forEach((b,i) => {
+    b.disabled = true;
+    if (i === correct) { b.classList.add('correct'); b.querySelector('.choice-icon').textContent='✓'; }
+    else if (i === idx && idx !== correct) { b.classList.add('wrong'); b.querySelector('.choice-icon').textContent='✗'; }
+    else { b.classList.add('faded'); }
+  });
+
+  if (idx === correct) {
+    score++;
+    fb.className = 'feedback show correct';
+    fbIcon.textContent = '✓';
+    fbText.textContent = 'Correct! Great job!';
+  } else {
+    fb.className = 'feedback show wrong';
+    fbIcon.textContent = '✗';
+    fbText.innerHTML = `Not quite. The correct answer is <strong>${q.choices[correct]}</strong>.`;
+  }
+
+  document.getElementById('score-display').textContent = `Score: ${score}/${qIndex+1}`;
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.className = 'next-btn show';
+  nextBtn.textContent = qIndex < currentQs.length - 1 ? 'Next Question →' : 'See My Results →';
+}
+
+function nextQuestion() {
+  qIndex++;
+  if (qIndex >= currentQs.length) { showResults(); return; }
+  renderQuestion();
+}
+
+function showResults() {
+  const total = currentQs.length;
+  const pct = Math.round((score/total)*100);
+  let badge, msg, sub, barColor;
+  if (pct >= 90) { badge='🏆'; msg='Outstanding!'; sub='Excellent work — you are really ready for the MCA!'; barColor='#16A34A'; }
+  else if (pct >= 75) { badge='🌟'; msg='Great job!'; sub='Strong performance — keep reviewing the questions you missed.'; barColor='#27AE72'; }
+  else if (pct >= 60) { badge='👍'; msg='Good effort!'; sub='You are on the right track. Review the missed questions and try again.'; barColor='#D97706'; }
+  else { badge='📚'; msg='Keep practicing!'; sub='Review these topics with your teacher and try again — you can do it!'; barColor='#DC2626'; }
+
+  document.getElementById('res-badge').textContent = badge;
+  document.getElementById('res-score').textContent = `${score} / ${total}`;
+  document.getElementById('res-label').textContent = `${pct}% Correct`;
+  document.getElementById('res-msg').textContent = msg;
+  document.getElementById('res-sub').textContent = sub;
+  const bar = document.getElementById('res-bar');
+  bar.style.background = barColor;
+  bar.style.width = '0%';
+  setTimeout(() => { bar.style.width = pct + '%'; }, 100);
+
+  // Breakdown
+  const bd = document.getElementById('breakdown');
+  bd.innerHTML = '<h4>Question Review</h4>';
+  userAnswers.forEach((a, i) => {
+    const ok = a.chosen === a.correct;
+    const item = document.createElement('div');
+    item.className = 'breakdown-item';
+    const wrongText = !ok ? `<span class="b-wrong">${currentQs[i].choices[a.chosen]}</span>` : '';
+    item.innerHTML = `
+      <div class="b-num ${ok?'ok':'bad'}">${i+1}</div>
+      <div class="b-q">${a.q.replace(/&gt;/g,'>').replace(/&lt;/g,'<').replace(/&amp;/g,'&')}</div>
+      <div>${wrongText}<span class="b-ans">${a.correctText}</span></div>`;
+    bd.appendChild(item);
+  });
+
+  showScreen('screen-results');
+}
+
+function retryQuiz() { startQuiz(currentGrade); }
+function goHome() { showScreen('screen-home'); }
+</script>
+</body>
+</html>
