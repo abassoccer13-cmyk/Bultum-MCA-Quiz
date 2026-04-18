@@ -93,6 +93,12 @@ main{max-width:900px;margin:0 auto;padding:1.5rem 1rem 3rem}
 .bk:hover{border-color:var(--tx);color:var(--tx)}
 .qtl{font-weight:700;font-size:.93rem;font-family:'Outfit',sans-serif}
 .scr{margin-left:auto;background:var(--pl);color:var(--pd);border-radius:20px;padding:.25rem .85rem;font-size:.79rem;font-weight:600}
+.streak{background:linear-gradient(135deg,#FFF3E0,#FFE0B2);color:#E65100;border:1.5px solid #FB8C00;border-radius:20px;padding:.25rem .75rem;font-size:.79rem;font-weight:700;margin-left:.4rem;display:none;transition:transform .2s;white-space:nowrap}
+.streak.show{display:inline-block}
+.streak.pulse{transform:scale(1.15)}
+.bp-review{background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#92400E;border:1.5px solid #F59E0B;border-radius:10px;padding:.75rem 1.4rem;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit}
+.bp-review:hover{background:linear-gradient(135deg,#FDE68A,#FCD34D);transform:translateY(-1px)}
+.bp-review:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .pw{background:#E5E7EB;border-radius:99px;height:6px;margin-bottom:1.3rem;overflow:hidden}
 .pf{height:100%;background:linear-gradient(90deg,var(--ga),var(--pu));border-radius:99px;transition:width .4s}
 .pl{font-size:.74rem;color:var(--mu);margin-bottom:.35rem;display:flex;justify-content:space-between}
@@ -233,6 +239,24 @@ main{max-width:900px;margin:0 auto;padding:1.5rem 1rem 3rem}
 .fc-complete.show{display:block}
 .fc-complete h3{color:#14532D;font-family:'Outfit',sans-serif;font-size:1.3rem;margin-bottom:.4rem}
 .fc-complete p{color:#166534;font-size:.88rem;margin-bottom:1rem}
+/* Flashcard 1v1 Mode */
+.fc-player-bar{display:none;align-items:center;gap:.6rem;padding:.6rem .9rem;border-radius:10px;margin-bottom:.8rem;font-family:'Outfit',sans-serif;font-weight:700;font-size:.92rem;flex-wrap:wrap}
+.fc-player-bar.show{display:flex}
+.fc-player-bar.p1{background:linear-gradient(135deg,#D1FAE5,#A7F3D0);color:#065F46;border:1.5px solid #10B981}
+.fc-player-bar.p2{background:linear-gradient(135deg,#DBEAFE,#BFDBFE);color:#1E3A8A;border:1.5px solid #3B82F6}
+.fc-1v1-score{margin-left:auto;font-size:.78rem;font-weight:600;background:rgba(255,255,255,.6);padding:.25rem .7rem;border-radius:99px}
+.fc-ans-row{display:none;gap:.6rem;margin-top:.7rem}
+.fc-ans-row.show{display:flex}
+.fc-ans-btn{flex:1;border:none;border-radius:10px;padding:.9rem 1rem;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit;color:#fff}
+.fc-ans-correct{background:linear-gradient(135deg,#10B981,#059669)}
+.fc-ans-correct:hover{background:linear-gradient(135deg,#059669,#047857)}
+.fc-ans-wrong{background:linear-gradient(135deg,#EF4444,#DC2626)}
+.fc-ans-wrong:hover{background:linear-gradient(135deg,#DC2626,#B91C1C)}
+.fc-1v1-final{background:linear-gradient(135deg,#FAF5FF,#F3E8FF);border:1.5px solid #C4B5FD;border-radius:14px;padding:1.5rem;text-align:center;margin-top:1rem;display:none}
+.fc-1v1-final.show{display:block}
+.fc-1v1-final h3{color:#5B21B6;font-family:'Outfit',sans-serif;font-size:1.4rem;margin-bottom:.5rem}
+.fc-1v1-final .winner{font-size:2rem;font-weight:900;color:#7C3AED;margin:.5rem 0;font-family:'Outfit',sans-serif}
+.fc-1v1-final .scores{font-size:1rem;color:#6B21A8;margin-bottom:1rem;font-weight:600}
 .copyright-footer{text-align:center;margin-top:2rem;padding:1rem 1rem;border-top:1px solid var(--bo);font-size:.65rem;color:var(--mu);line-height:1.55}
 @media(max-width:600px){.fc-deck-grid{grid-template-columns:1fr}.fc-term-word{font-size:1.5rem}.fc-term-emoji{font-size:2.8rem}.fc-def-visual{font-size:2rem}.fc-def-text{font-size:.92rem}.fc-def-title{font-size:1.1rem}.fc-face{padding:1.5rem 1rem}.fc-card{min-height:340px}.fc-nav-btn{padding:.75rem .6rem;font-size:.85rem}.fc-deck-color{width:55px}.fc-deck-num{font-size:1.5rem}}
 </style>
@@ -279,6 +303,7 @@ main{max-width:900px;margin:0 auto;padding:1.5rem 1rem 3rem}
 <button class="bk" onclick="goSubj()">&#8592; Subjects</button>
 <span class="qtl" id="qtl"></span>
 <span class="scr" id="scr">Score: 0/0</span>
+<span class="streak" id="streak">🔥 0</span>
 </div>
 <div class="pl"><span id="pll">Question 1</span><span id="ppc">0%</span></div>
 <div class="pw"><div class="pf" id="pf" style="width:0%"></div></div>
@@ -312,6 +337,7 @@ main{max-width:900px;margin:0 auto;padding:1.5rem 1rem 3rem}
 </div>
 <div class="ra">
 <button class="bp" onclick="retry()">Try Again</button>
+<button class="bp-review" id="review-btn" onclick="retryMissed()" style="display:none">🎯 Review Missed</button>
 <button class="bk2" onclick="goSubj()">Other Subjects</button>
 <button class="bs" onclick="goHome()">Change Grade</button>
 </div>
@@ -325,6 +351,7 @@ main{max-width:900px;margin:0 auto;padding:1.5rem 1rem 3rem}
 <span class="fc-qtl" id="fc-qtl"></span>
 <span class="fc-scr" id="fc-scr">Card 1/45</span>
 </div>
+<div class="fc-player-bar" id="fc-playerBar"></div>
 <div class="fc-pl"><span id="fc-pll">Card 1 of 45</span><span id="fc-ppc">0% learned</span></div>
 <div class="fc-pw"><div class="fc-pf" id="fc-pf" style="width:0%"></div></div>
 <div class="fc-card-scene">
@@ -344,12 +371,16 @@ main{max-width:900px;margin:0 auto;padding:1.5rem 1rem 3rem}
 </div>
 </div>
 </div>
-<div class="fc-nav-row">
+<div class="fc-ans-row" id="fc-ansRow">
+<button class="fc-ans-btn fc-ans-wrong" onclick="fcAnswer(false)">❌ Missed</button>
+<button class="fc-ans-btn fc-ans-correct" onclick="fcAnswer(true)">✅ Got it!</button>
+</div>
+<div class="fc-nav-row" id="fc-navRow">
 <button class="fc-nav-btn secondary" id="fc-prev" onclick="fcPrev()">&#8592; Previous</button>
 <button class="fc-flip-btn" onclick="fcFlip()">🔄 Flip Card</button>
 <button class="fc-nav-btn" id="fc-next" onclick="fcNext()">Next &#8594;</button>
 </div>
-<div class="fc-tool-row">
+<div class="fc-tool-row" id="fc-toolRow">
 <button class="fc-tool-btn" onclick="fcShuffle()">🔀 Shuffle</button>
 <button class="fc-tool-btn" id="fc-learnBtn" onclick="fcToggleLearn()">✓ Mark Learned</button>
 <button class="fc-tool-btn" onclick="fcReset()">↺ Restart</button>
@@ -359,11 +390,16 @@ main{max-width:900px;margin:0 auto;padding:1.5rem 1rem 3rem}
 <p>You've made it through the deck. Review again or try the other deck.</p>
 <button class="fc-nav-btn" style="flex:none;padding:.7rem 2rem" onclick="fcReset()">↺ Study Again</button>
 </div>
+<div class="fc-1v1-final" id="fc-1v1Final">
+<h3>🏆 Match Complete!</h3>
+<div class="winner" id="fc-1v1Winner">Player 1 wins!</div>
+<div class="scores" id="fc-1v1Scores">P1: 5 · P2: 3</div>
+<button class="fc-nav-btn" style="flex:none;padding:.7rem 2rem;display:inline-block" onclick="goHome()">← Back to Decks</button>
+</div>
 </div>
 
 <footer class="copyright-footer">
-© 2026 Bultum Academy. All rights reserved.<br>
-Unauthorized reproduction, distribution, or modification of this content is strictly prohibited.
+© 2026 Bultum Academy. All rights reserved.
 </footer>
 </main>
 <!-- Mode Selection Overlay -->
@@ -385,6 +421,25 @@ Unauthorized reproduction, distribution, or modification of this content is stri
 <button class="bk" onclick="closeOverlay('mode-overlay')" style="width:100%;justify-content:center">Cancel</button>
 </div>
 </div>
+<!-- Flashcard Mode Selection Overlay -->
+<div class="overlay" id="fc-mode-overlay">
+<div class="obox">
+<h2>Choose Your Mode</h2>
+<p id="fc-mo-label">Select how you want to practice</p>
+<div class="mode-btns">
+<button class="mbtn mbtn-solo" onclick="fcStart('study')">
+<span class="mi">📖</span>
+<span class="mbtn-text"><strong>Study Mode</strong><span>Flip through cards at your own pace</span></span>
+</button>
+<button class="mbtn mbtn-1v1" onclick="fcStart('1v1')">
+<span class="mi">⚔️</span>
+<span class="mbtn-text"><strong>1v1 Challenge</strong><span>Two players take turns — most correct recalls wins!</span></span>
+</button>
+</div>
+<br>
+<button class="bk" onclick="closeOverlay('fc-mode-overlay')" style="width:100%;justify-content:center">Cancel</button>
+</div>
+</div>
 <!-- Handoff Overlay -->
 <div class="overlay" id="handoff-overlay">
 <div class="obox">
@@ -401,6 +456,7 @@ const L=["A","B","C","D"];
 const SI={Reading:"📖",Math:"🔢",Science:"🔬","Math Practice 1":"🔢","Math Practice 2":"📊"};
 let cG=null,cS=null,cQs=[],cPassages=[],hasPassages=false;
 let qi=0,sc=0,ua=[],curPassageIdx=-1,passageOpen=true;
+let streak=0,bestStreak=0;
 let mode="solo",curPlayer=1,p1sc=0,p2sc=0;
 
 function isPassageSubject(data){return !Array.isArray(data)&&data.passages!==undefined;}
@@ -420,7 +476,17 @@ Object.entries(D).forEach(([g,d])=>{
 document.getElementById("total-q").textContent=totalQ.toLocaleString();
 
 function show(id){document.querySelectorAll(".sc").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");window.scrollTo(0,0);}
-function goHome(){closeOverlay("mode-overlay");closeOverlay("handoff-overlay");show("s0");}
+function goHome(){
+  closeOverlay("mode-overlay");closeOverlay("handoff-overlay");closeOverlay("fc-mode-overlay");
+  // restore flashcard UI in case user left mid-1v1
+  var scene=document.querySelector("#s4 .fc-card-scene");if(scene)scene.style.display="";
+  var fcc=document.getElementById("fc-card");if(fcc)fcc.style.display="";
+  var fin=document.getElementById("fc-1v1Final");if(fin)fin.classList.remove("show");
+  var pb=document.getElementById("fc-playerBar");if(pb)pb.className="fc-player-bar";
+  var ar=document.getElementById("fc-ansRow");if(ar)ar.classList.remove("show");
+  fcMode="study";
+  show("s0");
+}
 function goSubj(){if(cG)pickG(cG);}
 function closeOverlay(id){document.getElementById(id).classList.remove("show");}
 
@@ -466,6 +532,8 @@ function _startQuiz(){
     cQs=[...subjData];cPassages=[];hasPassages=false;
   }
   qi=0;sc=0;ua=[];p1sc=0;p2sc=0;curPlayer=1;curPassageIdx=-1;passageOpen=true;
+  streak=0;bestStreak=0;
+  document.getElementById("streak").classList.remove("show");
   document.getElementById("qtl").textContent=cG+" — "+cS;
   show("s2");renderQ();
 }
@@ -519,8 +587,16 @@ function renderQ(){
 function pick(idx){
   const q=cQs[qi],cor=q[2],correct=idx===cor;
   if(mode==="1v1"){if(curPlayer===1&&correct)p1sc++;else if(curPlayer===2&&correct)p2sc++;}
-  else{if(correct)sc++;}
-  ua.push({chosen:idx,correct:cor,qt:q[0],ct:q[1][cor],cht:q[1][idx],player:curPlayer});
+  else{
+    if(correct)sc++;
+    // Streak (solo mode only)
+    if(correct){streak++;if(streak>bestStreak)bestStreak=streak;}
+    else{streak=0;}
+    const se=document.getElementById("streak");
+    if(streak>=2){se.classList.add("show");se.textContent="🔥 "+streak;se.classList.add("pulse");setTimeout(()=>se.classList.remove("pulse"),250);}
+    else{se.classList.remove("show");}
+  }
+  ua.push({chosen:idx,correct:cor,qt:q[0],ct:q[1][cor],cht:q[1][idx],player:curPlayer,qRef:q});
   document.querySelectorAll(".cb").forEach((b,i)=>{
     b.disabled=true;
     if(i===cor){b.classList.add("correct");b.querySelector(".ci").textContent="✓";}
@@ -593,6 +669,13 @@ function showRes(){
     const bar=document.getElementById("rba");bar.style.background=bc;bar.style.width="0%";
     setTimeout(()=>bar.style.width=pct+"%",100);
   }
+  // Review Missed button: solo mode only, only if there are any misses
+  const rbBtn=document.getElementById("review-btn");
+  const missedCount=ua.filter(a=>a.chosen!==a.correct).length;
+  if(mode!=="1v1"&&missedCount>0&&missedCount<ua.length){
+    rbBtn.style.display="";
+    rbBtn.textContent="🎯 Review Missed ("+missedCount+")";
+  }else{rbBtn.style.display="none";}
   const bd=document.getElementById("bdd");bd.innerHTML="<h4>Question Review</h4>";
   ua.forEach((a,i)=>{
     const ok=a.chosen===a.correct,el=document.createElement("div");el.className="bdi";
@@ -604,6 +687,17 @@ function showRes(){
   show("s3");
 }
 function retry(){_startQuiz();}
+function retryMissed(){
+  // Rebuild cQs from only the missed questions, keep passages so passage-linked questions still work
+  const missed=ua.filter(a=>a.chosen!==a.correct).map(a=>a.qRef);
+  if(missed.length===0)return;
+  cQs=missed;
+  qi=0;sc=0;ua=[];p1sc=0;p2sc=0;curPlayer=1;curPassageIdx=-1;passageOpen=true;
+  streak=0;bestStreak=0;
+  document.getElementById("streak").classList.remove("show");
+  document.getElementById("qtl").textContent=cG+" — "+cS+" · Review";
+  show("s2");renderQ();
+}
 
 /* ===== FLASHCARD LOGIC ===== */
 const DECKS = {
@@ -727,6 +821,7 @@ const DECKS = {
   }
 };
 var fcDeck=null,fcOrder=[],fcIdx=0,fcFlipped=false,fcLearned={};
+var fcMode="study",fc1P1=0,fc1P2=0,fc1CurPlayer=1,fc1PendingKey=null;
 
 function fcRenderHome(){
   var grid=document.getElementById("fc-deck-grid");
@@ -744,12 +839,26 @@ function fcRenderHome(){
   });
 }
 function fcOpen(key){
-  fcDeck=key;
+  fc1PendingKey=key;
+  var deck=DECKS[key];
+  document.getElementById("fc-mo-label").textContent=deck.title+" — "+deck.cards.length+" cards";
+  document.getElementById("fc-mode-overlay").classList.add("show");
+}
+function fcStart(m){
+  closeOverlay("fc-mode-overlay");
+  var key=fc1PendingKey;if(!key)return;
+  fcDeck=key;fcMode=m;
   var deck=DECKS[key];
   fcOrder=deck.cards.map(function(_,i){return i;});
+  if(m==="1v1"){
+    // shuffle for fairness
+    for(var i=fcOrder.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=fcOrder[i];fcOrder[i]=fcOrder[j];fcOrder[j]=t;}
+    fc1P1=0;fc1P2=0;fc1CurPlayer=1;
+  }
   fcIdx=0;fcFlipped=false;
   if(!fcLearned[key])fcLearned[key]=[];
-  document.getElementById("fc-qtl").textContent=deck.title;
+  document.getElementById("fc-qtl").textContent=deck.title+(m==="1v1"?" — 1v1":"");
+  document.getElementById("fc-1v1Final").classList.remove("show");
   fcShow();
   show("s4");
 }
@@ -769,18 +878,72 @@ function fcShow(){
   document.getElementById("fc-tagB").textContent=card[5];
   document.getElementById("fc-scr").textContent="Card "+(fcIdx+1)+"/"+total;
   document.getElementById("fc-pll").textContent="Card "+(fcIdx+1)+" of "+total;
-  var pct=Math.round((learnedSize/total)*100);
-  document.getElementById("fc-ppc").textContent=pct+"% learned";
-  document.getElementById("fc-pf").style.width=pct+"%";
-  document.getElementById("fc-prev").disabled=fcIdx===0;
-  document.getElementById("fc-next").disabled=fcIdx===total-1;
-  var lb=document.getElementById("fc-learnBtn");
-  if(fcLearned[fcDeck].indexOf(fcOrder[fcIdx])>=0){lb.classList.add("active");lb.innerHTML="✓ Learned";}
-  else{lb.classList.remove("active");lb.innerHTML="✓ Mark Learned";}
+  // 1v1 mode UI toggling
+  var pb=document.getElementById("fc-playerBar");
+  var ansRow=document.getElementById("fc-ansRow");
+  var navRow=document.getElementById("fc-navRow");
+  var toolRow=document.getElementById("fc-toolRow");
   var cp=document.getElementById("fc-complete");
-  if(learnedSize===total)cp.classList.add("show");else cp.classList.remove("show");
+  if(fcMode==="1v1"){
+    pb.className="fc-player-bar show "+(fc1CurPlayer===1?"p1":"p2");
+    pb.innerHTML=(fc1CurPlayer===1?"🟢":"🔵")+" <strong>Player "+fc1CurPlayer+"'s Turn</strong> — try to recall, then flip"+
+      "<span class=\"fc-1v1-score\">P1: "+fc1P1+" · P2: "+fc1P2+"</span>";
+    ansRow.classList.remove("show");
+    navRow.style.display="none";
+    toolRow.style.display="none";
+    cp.classList.remove("show");
+    // show percent based on turn progress, not learned count
+    var pct=Math.round(((fcIdx)/total)*100);
+    document.getElementById("fc-ppc").textContent=pct+"% done";
+    document.getElementById("fc-pf").style.width=pct+"%";
+  }else{
+    pb.className="fc-player-bar";
+    ansRow.classList.remove("show");
+    navRow.style.display="flex";
+    toolRow.style.display="flex";
+    var pct=Math.round((learnedSize/total)*100);
+    document.getElementById("fc-ppc").textContent=pct+"% learned";
+    document.getElementById("fc-pf").style.width=pct+"%";
+    document.getElementById("fc-prev").disabled=fcIdx===0;
+    document.getElementById("fc-next").disabled=fcIdx===total-1;
+    var lb=document.getElementById("fc-learnBtn");
+    if(fcLearned[fcDeck].indexOf(fcOrder[fcIdx])>=0){lb.classList.add("active");lb.innerHTML="✓ Learned";}
+    else{lb.classList.remove("active");lb.innerHTML="✓ Mark Learned";}
+    if(learnedSize===total)cp.classList.add("show");else cp.classList.remove("show");
+  }
 }
-function fcFlip(){fcFlipped=!fcFlipped;document.getElementById("fc-card").classList.toggle("flipped",fcFlipped);}
+function fcFlip(){
+  fcFlipped=!fcFlipped;
+  document.getElementById("fc-card").classList.toggle("flipped",fcFlipped);
+  // Show answer buttons when back is revealed in 1v1 mode
+  if(fcMode==="1v1"){
+    var ansRow=document.getElementById("fc-ansRow");
+    if(fcFlipped)ansRow.classList.add("show");
+    else ansRow.classList.remove("show");
+  }
+}
+function fcAnswer(correct){
+  if(fcMode!=="1v1")return;
+  if(correct){if(fc1CurPlayer===1)fc1P1++;else fc1P2++;}
+  var total=DECKS[fcDeck].cards.length;
+  if(fcIdx>=total-1){fcFinish1v1();return;}
+  fcIdx++;
+  fc1CurPlayer=(fc1CurPlayer===1)?2:1;
+  fcShow();
+}
+function fcFinish1v1(){
+  var pb=document.getElementById("fc-playerBar");pb.className="fc-player-bar";
+  document.getElementById("fc-ansRow").classList.remove("show");
+  document.getElementById("fc-card").style.display="none";
+  document.querySelector("#s4 .fc-card-scene").style.display="none";
+  var final=document.getElementById("fc-1v1Final");
+  var winEl=document.getElementById("fc-1v1Winner");
+  if(fc1P1>fc1P2)winEl.textContent="🎉 Player 1 wins!";
+  else if(fc1P2>fc1P1)winEl.textContent="🎉 Player 2 wins!";
+  else winEl.textContent="🤝 It's a tie!";
+  document.getElementById("fc-1v1Scores").textContent="Player 1: "+fc1P1+" correct · Player 2: "+fc1P2+" correct";
+  final.classList.add("show");
+}
 function fcNext(){if(fcIdx<DECKS[fcDeck].cards.length-1){fcIdx++;fcShow();}}
 function fcPrev(){if(fcIdx>0){fcIdx--;fcShow();}}
 function fcShuffle(){for(var i=fcOrder.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=fcOrder[i];fcOrder[i]=fcOrder[j];fcOrder[j]=t;}fcIdx=0;fcShow();}
@@ -788,9 +951,14 @@ function fcToggleLearn(){var k=fcOrder[fcIdx];var s=fcLearned[fcDeck];var p=s.in
 function fcReset(){var deck=DECKS[fcDeck];fcOrder=deck.cards.map(function(_,i){return i;});fcIdx=0;fcLearned[fcDeck]=[];fcShow();}
 document.addEventListener("keydown",function(e){
   if(document.getElementById("s4") && document.getElementById("s4").classList.contains("active")){
-    if(e.key==="ArrowRight")fcNext();
-    else if(e.key==="ArrowLeft")fcPrev();
-    else if(e.key===" "||e.key==="Enter"){e.preventDefault();fcFlip();}
+    if(fcMode==="1v1"){
+      // in 1v1 mode, only allow flip (Space/Enter); advancement is via buttons
+      if(e.key===" "||e.key==="Enter"){e.preventDefault();fcFlip();}
+    }else{
+      if(e.key==="ArrowRight")fcNext();
+      else if(e.key==="ArrowLeft")fcPrev();
+      else if(e.key===" "||e.key==="Enter"){e.preventDefault();fcFlip();}
+    }
   }
 });
 
